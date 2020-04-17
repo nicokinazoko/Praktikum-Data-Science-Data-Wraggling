@@ -1,0 +1,85 @@
+---
+title: "Tugas Modul 9"
+output: pdf_document
+author : "Nico"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+```
+
+## 1. Jalankan perintah berikut untuk membuat objek baru bernama “co2_wide”:
+
+```{r }
+co2_wide <- data.frame(matrix(co2, ncol = 12)) %>% 
+setNames(1:12) %>% 
+mutate(year = as.character(1959:1997))
+head(co2_wide)
+```
+
+# Mengubah dataset menjadi tidy
+
+```{r }
+co2_tidy <- gather(co2_wide,month,year, convert = TRUE)
+head(co2_tidy)
+```
+
+## 2. Plot CO2 versus month dengan plot yang berbeda untuk setiap year menggunakan script ini:
+
+```{r }
+co2_tidy %>% ggplot(aes(month, co2, color = year)) + geom_point(mapping = aes(x = month, y = year))
+class(co2_tidy$month)
+```
+
+# Hasil dari pembenaran gather
+```{r }
+co2_tidy <- gather(co2_wide,month,year, convert = TRUE)
+class(co2_tidy$month)
+```
+
+# Joining Table
+
+## 1. Data frame Batting berisi statistik ofensif semua pemain selama beberapa tahun. Lakukan preview data, misalnya, tampilkan 10 batting teratas dengan menjalankan script ini:
+
+```{r }
+library(Lahman) 
+top <- Batting %>% 
+filter(yearID == 2016) %>% 
+arrange(desc(HR)) %>% 
+slice(1:10) 
+top %>% as_tibble()
+```
+
+Script diatas hanya menampilkan ID, bukan nama pemain. Nama-nama pemain dapat dilihat 
+pada tabel ini :
+
+```{r }
+Master %>% as_tibble()
+```
+
+# Left Join untuk membuat  yang berisi ID pemain, nama depan, nama belakang, dan jumlah home run (SDM). Simpan hasil left_join pada objek baru
+
+```{r }
+tabel_batting <- Batting %>% select(playerID,HR)
+tabel_master <- Master %>% select(playerID,nameFirst, nameLast,)
+hasil_left_join <- left_join(tabel_master, tabel_batting, by = "playerID" )
+# %>% select(Master$playerID, Master$nameFirst, Master$nameLast, Batting$HR)
+head(hasil_left_join)
+```
+
+## 2. Dengan menggunakan dataset yang sama, gunakan data frame “Salaries” untuk menambahkan informasi gaji masing-masing pemain ke tabel yang telah dibuat dalam latihan no 1. Perhatikan bahwa besar gaji berbeda setiap tahunnya. Pastikan untuk memfilter gaji pada tahun 2016, lalu gunakan right_join. Tampilkan hasil yang berisi: nama depan, nama belakang, tim, SDM, dan gaji.
+
+```{r }
+tabel_batting_baru <- Batting %>% select(playerID,teamID,HR)
+tabel_salaries <- Salaries %>% filter (yearID == 2016 ) %>% select(playerID,salary)
+tabel_master_baru <- Master %>% select(playerID,nameFirst,nameLast)
+
+hasil_right_join_1 <- right_join(tabel_master_baru,tabel_batting_baru, by = "playerID")
+view(hasil_right_join_1)
+hasil_right_join_2 <- right_join(hasil_right_join_1, tabel_salaries, by = "playerID")
+
+head(hasil_right_join_2)
+
+```
