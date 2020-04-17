@@ -1,0 +1,77 @@
+---
+title: "Join Table"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Join Table
+
+# Mengambil Data populasi voting presiden AS 
+```{r }
+library(tidyverse)
+library(dslabs)
+data("murders")
+view(murders)
+view(results_us_election_2016)
+```
+
+# Mengecek isi dari state di dataset result election dan di murders
+```{r }
+identical(results_us_election_2016$state , murders$state)
+```
+
+# Contoh Left Join
+```{r }
+tab <- left_join(murders, results_us_election_2016, by = "state")%>% select(-others) %>% rename(ev = electoral_votes)
+view(tab)
+```
+
+# Untuk mengetahui hubungan populasi dengan presiden
+
+```{r }
+library(ggrepel)
+```
+
+# Plot data menggunakan ggplot
+
+```{r }
+tab %>% ggplot(aes(population/10^6, ev, label = abb)) + geom_point() + geom_text_repel() + scale_x_continuous(trans = "log2") + scale_y_continuous(trans = "log2") + geom_smooth(method = "lm", se = FALSE)
+```
+
+# Mempelajari isi perbedaan
+
+```{r }
+tab_1 <- slice(murders,1:6) %>% select(state,abb)
+tab_1
+tab_2 <- results_us_election_2016 %>% filter(state %in% c("Alabama","Alaska", "Arizona", "California", "Connecticut", "Delaware")) %>% select(state,electoral_votes) %>% rename(ev = electoral_votes)
+tab_2
+```
+
+# Mencoba Left Join
+```{r }
+left_join(tab_1,tab_2, by = "state")
+```
+
+# Mencoba Right join
+```{r }
+right_join(tab_1,tab_2, by = "state")
+```
+
+
+# Mencoba Full Join
+```{r }
+full_join(tab_1,tab_2, by = "state")
+```
+
+# Mencoba Semi Join
+```{r }
+semi_join(tab_1,tab_2, by = "state")
+```
+
+# Mencoba Anti Join
+```{r }
+anti_join(tab_1,tab_2, by = "state")
+```
